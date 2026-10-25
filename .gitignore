@@ -2,4 +2,4 @@
 *.pem
 .env
 .vault_pass
-*.retry
+*.retry.DS_Store
