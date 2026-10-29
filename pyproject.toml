@@ -1,10 +1,10 @@
 [project]
 name = "cloud-1"
 version = "0.1.0"
-description = "to-do"
+description = ""
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = "==3.13.*"
 dependencies = [
-    "ansible-core>=2.21.5",
-    "pre-commit>=4.7.0",
+    "ansible-core==2.21.5",
+    "pre-commit==4.7.0",
 ]

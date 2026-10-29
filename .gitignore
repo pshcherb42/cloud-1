@@ -1,8 +1,13 @@
 .env
 .venv
 *.pem
-.env
+*.key
 .vault_pass
 *.retry
+*.log
+__pycache__/
 .DS_Store
+.vscode
+.idea
 .atl
+.ansible

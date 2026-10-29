@@ -5,7 +5,7 @@ all: help
 setup:
 	@bash scripts/setup.sh
 
-setup-dev: 
+setup-dev:
 	@bash scripts/setup.sh -dev
 
 help:
