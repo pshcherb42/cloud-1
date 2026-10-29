@@ -1,5 +1,8 @@
 .env
+.venv
 *.pem
 .env
 .vault_pass
 *.retry
+.DS_Store
+.atl
