@@ -11,6 +11,6 @@ setup-dev:
 help:
 	@echo "Available commands:"
 	@echo "make setup		- Installs project dependencies"
-	@echo "make setup-dev	- Same + some development and testing tools"
+	@echo "make setup-dev	- Also installs 'multipass' (macOS only) for local VMs"
 
 .PHONY: all help setup setup-dev

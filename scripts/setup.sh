@@ -33,7 +33,8 @@ fi
 
 if [ "$DEV" = true ]; then
     if [ "$OS" = "Darwin" ]; then
-        command -v multipass > /dev/null || brew install --cask multipass
+        command -v multipass > /dev/null || brew install --cask multipass # install multipass only if it isn't already on PATH
+
     else
         echo "Skipping multipass: use your Mac for local VMs"
         echo "If you're using your own Linux please run 'sudo snap install multipass'"
