@@ -8,9 +8,13 @@ setup:
 setup-dev:
 	@bash scripts/setup.sh -dev
 
+lint:
+	@uv run pre-commit run --all-files
+
 help:
 	@echo "Available commands:"
 	@echo "make setup		- Installs project dependencies"
 	@echo "make setup-dev	- Also installs 'multipass' (macOS only) for local VMs"
+	@echo "make lint		- Runs every pre-commit check on ALL files"
 
-.PHONY: all help setup setup-dev
+.PHONY: all help setup setup-dev lint
