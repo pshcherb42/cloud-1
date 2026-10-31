@@ -9,12 +9,13 @@ cd "$(dirname "$0")/.."
 # Colors only when printing to a terminal (not when output is piped or logged)
 if [ -t 1 ]; then # -t 1 checks if is file descriptor 1 (stdout)
     BLUE=$'\033[34m'
+    MAGENTA=$'\033[35m'
     GREEN=$'\033[32m'
     YELLOW=$'\033[33m'
     RED=$'\033[31m'
     RESET=$'\033[0m'
 else
-    BLUE="" GREEN="" YELLOW="" RED="" RESET=""
+    BLUE="" MAGENTA="" GREEN="" YELLOW="" RED="" RESET=""
 fi
 
 OS="$(uname -s)"
@@ -23,7 +24,7 @@ echo "${BLUE}Detected operating system: $OS${RESET}"
 DEV=false
 if [ "${1:-}" = "-dev" ]; then
     DEV=true
-    echo "${BLUE}Devmode ON${RESET}"
+    echo "${MAGENTA}Devmode ON${RESET}"
 fi
 
 if ! command -v uv > /dev/null; then

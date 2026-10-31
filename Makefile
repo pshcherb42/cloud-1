@@ -12,7 +12,7 @@ setup:
 setup-dev:
 	@bash scripts/setup.sh -dev
 	@$(MAKE) vms-up
-	@echo "$(BLUE)VMs ready. Run 'make help' to see the VM commands$(RESET)"
+	@echo "$(MAGENTA)VMs ready. Run 'make help' to see the VM commands$(RESET)"
 
 vms-up:
 	@bash scripts/vms.sh up

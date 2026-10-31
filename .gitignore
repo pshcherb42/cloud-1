@@ -13,3 +13,4 @@ __pycache__/
 .ansible
 cloud-1.pdf
 NOTES.md
+inventory/local.ini
