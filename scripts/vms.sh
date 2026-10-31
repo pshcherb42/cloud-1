@@ -32,6 +32,7 @@ if [ "$ACTION" = "up" ]; then
     for node in $NODES; do
         if ! multipass info "$node" > /dev/null 2>&1; then
             multipass launch 22.04 --name "$node" --cloud-init cloud-init.yml
+            ssh-keygen -R "$(multipass list | awk -v n="$node" '$1 == n {print $3}')" > /dev/null 2>&1 || true
         elif [ "$(multipass list | awk -v n="$node" '$1 == n {print $2}')" = "Running" ]; then
             echo "${MAGENTA}$node is already running${RESET}"
         else
