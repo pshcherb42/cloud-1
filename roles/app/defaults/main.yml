@@ -1,0 +1,6 @@
+---
+app_db_name: wordpress
+app_db_user: wpuser
+app_wp_title: Cloud-1
+app_wp_admin_user: cloud1admin
+app_wp_admin_email: admin@example.com
