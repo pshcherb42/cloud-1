@@ -14,3 +14,5 @@ __pycache__/
 cloud-1.pdf
 NOTES.md
 inventory/local.ini
+*.retry.DS_Store
+.htpasswd
