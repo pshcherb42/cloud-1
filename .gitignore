@@ -3,3 +3,4 @@
 .env
 .vault_pass
 *.retry.DS_Store
+.htpasswd
