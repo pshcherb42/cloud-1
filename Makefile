@@ -29,10 +29,10 @@ lint:
 clean:
 	@rm -rf .ansible
 
-fclean: clean
-	@rm -rf .venv .git/hooks/pre-commit ~/.cache/pre-commit
+devclean: clean vms-destroy
 
-devclean: fclean vms-destroy
+fclean: devclean
+	@rm -rf .venv .git/hooks/pre-commit ~/.cache/pre-commit
 
 help:
 	@echo "$(BLUE)╔══════════════════════════════════════════════════════════════════════════════╗$(RESET)"
@@ -61,10 +61,10 @@ help:
 	@echo "$(BLUE)║                                                                              ║$(RESET)"
 	@echo "$(BLUE)║  CLEANUP:                                                                    ║$(RESET)"
 	@echo "$(BLUE)║$(RESET)   >  $(BLUE)make clean       $(RESET) Removes the local ansible cache (.ansible)            $(BLUE)║$(RESET)"
-	@echo "$(BLUE)║$(RESET)   >  $(BLUE)make fclean      $(RESET) clean + removes the virtual environment               $(BLUE)║$(RESET)"
+	@echo "$(BLUE)║$(RESET)   >  $(MAGENTA)make devclean    $(RESET) clean + destroys the VMs                              $(BLUE)║$(RESET)"
+	@echo "$(BLUE)║$(RESET)   >  $(BLUE)make fclean      $(RESET) devclean + removes the virtual environment            $(BLUE)║$(RESET)"
 	@echo "$(BLUE)║$(RESET)                        and the git hook (run make setup again!)              $(BLUE)║$(RESET)"
-	@echo "$(BLUE)║$(RESET)   >  $(MAGENTA)make devclean    $(RESET) fclean + vms-destroy (undoes setup-dev)               $(BLUE)║$(RESET)"
 	@echo "$(BLUE)║                                                                              ║$(RESET)"
 	@echo "$(BLUE)╚══════════════════════════════════════════════════════════════════════════════╝$(RESET)"
 
-.PHONY: all help setup setup-dev lint clean fclean vms-up vms-list vms-down vms-destroy devclean
+.PHONY: all help setup setup-dev lint clean fclean vms-up vms-down vms-destroy devclean
