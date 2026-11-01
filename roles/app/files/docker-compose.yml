@@ -49,7 +49,7 @@ services:
     image: phpmyadmin:latest
     environment:
       PMA_HOST: mariadb
-      PMA_ABSOLUTE_URI: http://localhost/phpmyadmin/
+      PMA_ABSOLUTE_URI: ${PMA_ABSOLUTE_URI}
     depends_on:
       mariadb:
         condition: service_healthy
