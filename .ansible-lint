@@ -1,0 +1,3 @@
+---
+exclude_paths:
+  - cloud-init.yml # not Ansible; its first line must be exactly "#cloud-config"

@@ -1,0 +1,10 @@
+[project]
+name = "cloud-1"
+version = "0.1.0"
+description = "Automated deployment of a Docker Compose WordPress stack (nginx, MariaDB, phpMyAdmin) to cloud servers with Ansible"
+readme = "README.md"
+requires-python = "==3.13.*"
+dependencies = [
+    "ansible-core==2.21.5",
+    "pre-commit==4.7.0",
+]
