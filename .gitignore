@@ -12,6 +12,7 @@ __pycache__/
 .atl
 .ansible
 cloud-1.pdf
+Cloud-1 Plan.pdf
 NOTES.md
 inventory/local.ini
 *.retry.DS_Store
