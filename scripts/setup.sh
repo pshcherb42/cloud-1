@@ -55,6 +55,7 @@ fi
 
 uv sync --locked
 uv run pre-commit install
+uv run ansible-galaxy collection install -r requirements.yml
 
 echo "${GREEN}Setup finished successfully!${RESET}"
-echo "${GREEN}Please run 'source .venv/bin/activate' to start ansible${RESET}"
+echo "${GREEN}Run 'make help' to see the available commands${RESET}"
