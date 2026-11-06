@@ -1,0 +1,5 @@
+---
+- name: Restart ssh # handlers are named as "functions/actions" not final results
+  ansible.builtin.service:
+    name: ssh
+    state: restarted

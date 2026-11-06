@@ -5,4 +5,5 @@
   roles:
     - common
     - docker
+    - firewall
 # tasks moved to roles/{role}/tasks/main.yml
