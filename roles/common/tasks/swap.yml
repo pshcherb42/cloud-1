@@ -1,0 +1,23 @@
+---
+- name: Swap file is created # VMs probably won't have swap, so Ansible has to create it
+  community.general.filesize:
+    path: "{{ common_swap_path }}"
+    size: "{{ common_swap_size }}"
+    mode: "0600" # only root can read or write
+
+- name: Swap file formatted
+  community.general.filesystem:
+    fstype: swap
+    dev: "{{ common_swap_path }}"
+
+- name: Swap file added to fstab # fstab keeps swap active after a reboot
+  ansible.posix.mount:
+    src: "{{ common_swap_path }}"
+    path: none
+    fstype: swap
+    opts: sw # the standard for swap
+    state: present
+
+- name: Swap file is active
+  ansible.builtin.command: "swapon {{ common_swap_path }}"
+  changed_when: true
