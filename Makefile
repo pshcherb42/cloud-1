@@ -26,10 +26,10 @@ vms-destroy:
 lint:
 	@uv run pre-commit run --all-files
 
-deploy-local:
+deploy-local: vms-up
 	@uv run ansible-playbook -i inventory/local.ini site.yml
 
-check-local:
+check-local: vms-up
 	@uv run ansible-playbook -i inventory/local.ini site.yml --check --diff
 
 clean:
