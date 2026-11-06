@@ -1,0 +1,27 @@
+---
+- name: Docker apt repo added
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: https://download.docker.com/linux/ubuntu
+    suites: "{{ ansible_facts['distribution_release'] }}"
+    components: stable
+    signed_by: https://download.docker.com/linux/ubuntu/gpg
+    install_python_debian: true
+  register: docker_repo
+
+- name: Docker is installed
+  ansible.builtin.apt:
+    name:
+      - docker-ce # the background service that runs containers
+      - docker-ce-cli # the `docker` command you type to talk to the engine
+      - containerd.io # low-level runtime the engine uses to start containers
+      - docker-compose-plugin # adds `docker compose`
+    state: present
+    update_cache: "{{ docker_repo is changed }}"
+
+- name: Docker is running and enabled at boot
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true

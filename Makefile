@@ -26,6 +26,12 @@ vms-destroy:
 lint:
 	@uv run pre-commit run --all-files
 
+deploy-local: vms-up
+	@uv run ansible-playbook -i inventory/local.ini site.yml
+
+check-local: vms-up
+	@uv run ansible-playbook -i inventory/local.ini site.yml --check --diff
+
 clean:
 	@rm -rf .ansible
 
@@ -55,6 +61,8 @@ help:
 	@echo "$(BLUE)║$(RESET)   >  $(MAGENTA)make vms-up      $(RESET) Creates the VMs, or starts them if they exist         $(BLUE)║$(RESET)"
 	@echo "$(BLUE)║$(RESET)   >  $(MAGENTA)make vms-down    $(RESET) Stops the VMs (their disks are kept)                  $(BLUE)║$(RESET)"
 	@echo "$(BLUE)║$(RESET)   >  $(MAGENTA)make vms-destroy $(RESET) Deletes the VMs permanently                           $(BLUE)║$(RESET)"
+	@echo "$(BLUE)║$(RESET)   >  $(MAGENTA)make deploy-local$(RESET) Runs the playbook on the VMs                          $(BLUE)║$(RESET)"
+	@echo "$(BLUE)║$(RESET)   >  $(MAGENTA)make check-local $(RESET) Previews the playbook on the VMs, changes nothing     $(BLUE)║$(RESET)"
 	@echo "$(BLUE)║                                                                              ║$(RESET)"
 	@echo "$(BLUE)║  QUALITY:                                                                    ║$(RESET)"
 	@echo "$(BLUE)║$(RESET)   >  $(BLUE)make lint        $(RESET) Runs every pre-commit check on ALL files              $(BLUE)║$(RESET)"
@@ -67,4 +75,4 @@ help:
 	@echo "$(BLUE)║                                                                              ║$(RESET)"
 	@echo "$(BLUE)╚══════════════════════════════════════════════════════════════════════════════╝$(RESET)"
 
-.PHONY: all help setup setup-dev lint clean fclean vms-up vms-down vms-destroy devclean
+.PHONY: all help setup setup-dev lint deploy-local check-local clean fclean vms-up vms-down vms-destroy devclean

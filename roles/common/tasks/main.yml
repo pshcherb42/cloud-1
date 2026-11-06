@@ -1,0 +1,20 @@
+---
+# we don't tell "install this" we say whatever you do,
+# when you finish "this" should be installed
+- name: Base packages are installed # task names describe the result
+  ansible.builtin.apt:
+    name:
+      - curl # to download from command line
+      - ca-certificates # so server can trust HTTPS sites
+    state: present
+    update_cache: true
+    cache_valid_time: 3600 # 1h
+- name: SSH is running and enabled at boot
+  ansible.builtin.service:
+    name: ssh
+    state: started
+    enabled: true
+
+- name: Swap is configured # I preferred to move the swap tasks to its own file
+  ansible.builtin.import_tasks: swap.yml
+  when: ansible_facts['swaptotal_mb'] == 0

@@ -1,0 +1,11 @@
+---
+collections:
+  # for docker_compose_v2
+  - name: community.docker
+    version: 5.4.0
+  # for ufw (the unix firewall)
+  - name: community.general
+    version: 14.0.0
+  # for mount; to keep the swap file active after reboot
+  - name: ansible.posix
+    version: 2.2.2
