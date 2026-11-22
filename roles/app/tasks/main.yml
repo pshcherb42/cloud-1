@@ -23,3 +23,53 @@
     dest: "{{ app_dir }}/.env"
     mode: "0600"
   no_log: true
+
+- name: Nginx config is templated
+  ansible.builtin.template:
+    src: nginx/default.conf.j2
+    dest: "{{ app_dir }}/nginx/default.conf"
+    mode: "0644"
+  notify: Restart nginx
+
+- name: PhpMyAdmin basic auth file is present
+  ansible.builtin.copy:
+    content: "{{ vault_pma_htpasswd }}\n"
+    dest: "{{ app_dir }}/nginx/.htpasswd"
+    mode: "0644"
+  no_log: true
+  notify: Restart nginx
+
+- name: Compose stack is running
+  community.docker.docker_compose_v2:
+    project_src: "{{ app_dir }}"
+    state: present
+
+- name: Check whether WordPress is installed
+  community.docker.docker_compose_v2_run:
+    project_src: "{{ app_dir }}"
+    service: wpcli
+    command: wp core is-installed
+    cleanup: true
+  register: app_wp_check
+  changed_when: false
+  failed_when: app_wp_check.rc not in [0, 1]
+
+- name: WordPress is installed
+  community.docker.docker_compose_v2_run:
+    project_src: "{{ app_dir }}"
+    service: wpcli
+    command: >-
+      wp core install
+      --url={{ ('http://' ~ domain) | quote }}
+      --title={{ app_wp_title | quote }}
+      --admin_user={{ app_wp_admin_user | quote }}
+      --admin_password={{ vault_wp_admin_password | quote }}
+      --admin_email={{ app_wp_admin_email | quote }}
+      --skip-email
+    cleanup: true
+  register: app_wp_install
+  until: app_wp_install.rc == 0
+  retries: 6
+  delay: 5
+  when: app_wp_check.rc == 1
+  no_log: true

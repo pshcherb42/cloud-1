@@ -1,4 +1,4 @@
 #cloud-config
 ssh_authorized_keys:
   - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINo7boB32qX/GdwA6BlOXGl8L7Ywptu4uAQTK3ZKtKpH rmanzana@cloud-1
-  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINy/kKMgPnlkcpAZSbYxReYz8ATf1bMNs2JLIQpS5D+W pshcherb@cloud-1
+  - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGg7qhShJ101mipKk+11r7n3UzEYErKfwz97/Hv/ENHZ pshcherb@cloud-1
