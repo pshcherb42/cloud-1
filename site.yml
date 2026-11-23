@@ -1,9 +1,10 @@
 ---
-- name: Prepare servers
+- name: Deploy cloud-1 stack
   hosts: cloud1
   become: true # run as root
   roles:
     - common
     - docker
     - firewall
+    - app
 # tasks moved to roles/{role}/tasks/main.yml
