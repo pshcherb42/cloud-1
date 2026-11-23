@@ -17,3 +17,4 @@ NOTES.md
 inventory/local.ini
 *.retry.DS_Store
 .htpasswd
+GUIDE.html
