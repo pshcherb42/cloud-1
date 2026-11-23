@@ -4,6 +4,9 @@ BLUE    := $(shell printf '\033[34m')
 MAGENTA := $(shell printf '\033[35m')
 RESET   := $(shell printf '\033[0m')
 
+VAULT_FILE = group_vars/all/vault.yml
+VAULT_PASS = --vault-password-file .vault_pass
+
 all: help
 
 setup:
@@ -26,11 +29,17 @@ vms-destroy:
 lint:
 	@uv run pre-commit run --all-files
 
+vault-view:
+	@uv run ansible-vault view $(VAULT_FILE) $(VAULT_PASS)
+
+vault-edit:
+	@uv run ansible-vault edit $(VAULT_FILE) $(VAULT_PASS)
+
 deploy-local: vms-up
-	@uv run ansible-playbook -i inventory/local.ini site.yml
+	@uv run ansible-playbook -i inventory/local.ini site.yml $(VAULT_PASS)
 
 check-local: vms-up
-	@uv run ansible-playbook -i inventory/local.ini site.yml --check --diff
+	@uv run ansible-playbook -i inventory/local.ini site.yml --check --diff $(VAULT_PASS)
 
 clean:
 	@rm -rf .ansible
@@ -67,6 +76,10 @@ help:
 	@echo "$(BLUE)║  QUALITY:                                                                    ║$(RESET)"
 	@echo "$(BLUE)║$(RESET)   >  $(BLUE)make lint        $(RESET) Runs every pre-commit check on ALL files              $(BLUE)║$(RESET)"
 	@echo "$(BLUE)║                                                                              ║$(RESET)"
+	@echo "$(BLUE)║  SECRETS:                                                                    ║$(RESET)"
+	@echo "$(BLUE)║$(RESET)   >  $(BLUE)make vault-view  $(RESET) Shows the decrypted secrets (vault.yml)               $(BLUE)║$(RESET)"
+	@echo "$(BLUE)║$(RESET)   >  $(BLUE)make vault-edit  $(RESET) Edits the secrets, re-encrypts them on save           $(BLUE)║$(RESET)"
+	@echo "$(BLUE)║                                                                              ║$(RESET)"
 	@echo "$(BLUE)║  CLEANUP:                                                                    ║$(RESET)"
 	@echo "$(BLUE)║$(RESET)   >  $(BLUE)make clean       $(RESET) Removes the local ansible cache (.ansible)            $(BLUE)║$(RESET)"
 	@echo "$(BLUE)║$(RESET)   >  $(MAGENTA)make devclean    $(RESET) clean + destroys the VMs                              $(BLUE)║$(RESET)"
@@ -75,4 +88,4 @@ help:
 	@echo "$(BLUE)║                                                                              ║$(RESET)"
 	@echo "$(BLUE)╚══════════════════════════════════════════════════════════════════════════════╝$(RESET)"
 
-.PHONY: all help setup setup-dev lint deploy-local check-local clean fclean vms-up vms-down vms-destroy devclean
+.PHONY: all help setup setup-dev lint vault-view vault-edit deploy-local check-local clean fclean vms-up vms-down vms-destroy devclean
