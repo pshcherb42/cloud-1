@@ -1,6 +1,13 @@
 ---
+# Contract
 app_dir: /opt/cloud1
 pma_path: /phpmyadmin/
 le_email: genyo_liceo@hotmail.com
 le_staging: true
+
+# Role default overrides
 app_wp_admin_email: "{{ le_email }}"
+
+# Per-host defaults, override in inventory/host_vars/<host>.yml
+domain: "{{ ansible_host }}"
+tls_mode: selfsigned
