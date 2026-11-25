@@ -7,4 +7,10 @@
     - docker
     - firewall
     - app
-# tasks moved to roles/{role}/tasks/main.yml
+  # tasks moved to roles/{role}/tasks/main.yml
+  post_tasks:
+    - name: Show site URLs
+      ansible.builtin.debug:
+        msg:
+          - "WordPress: http://{{ domain }}/"
+          - "phpMyAdmin: http://{{ domain }}{{ pma_path }}"
