@@ -48,7 +48,7 @@ different lint results and "works on my machine" bugs.
 
 | File | What it pins |
 |------|--------------|
-| `pyproject.toml` | Python `3.13.*`, `ansible-core==2.21.5`, `pre-commit==4.7.0` |
+| `pyproject.toml` | Python `3.13.*`, `ansible-core==2.22.0`, `pre-commit==4.7.0` |
 | `uv.lock` | the exact versions of everything, including sub-dependencies |
 | `.python-version` | which Python uv uses (downloads it if missing) |
 
@@ -89,7 +89,7 @@ local development with VMs (your own Mac or Linux, not the classroom).
 
 ### Local VMs (multipass, not on classroom computers)
 
-Two Ubuntu 22.04 VMs (`node1`, `node2`) to test the playbook without paying for cloud servers.
+Two Ubuntu 26.04 VMs (`node1`, `node2`) to test the playbook without paying for cloud servers.
 
 | Command | Does |
 |---------|------|
