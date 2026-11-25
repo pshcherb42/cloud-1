@@ -11,16 +11,23 @@ You only need **uv** and **make**. The setup script installs uv if it's missing.
 # 1. Your own SSH key for this project (once per computer, never share the private file)
 ssh-keygen -t ed25519 -f ~/.ssh/cloud1 -C "<your-login>@cloud-1"
 
-# 2. Install everything + create the local VMs
+# 2. The vault key (once per computer). Ask your teammate for it, never via git
+echo '<the-vault-password>' > .vault_pass && chmod 600 .vault_pass
+
+# 3. Install everything + create the local VMs
 make setup-dev
 
-# 3. Check that Ansible reaches the VMs
+# 4. Check that Ansible reaches the VMs
 uv run ansible -i inventory/local.ini cloud1 -m ping
+
+# 5. Deploy the whole stack to the VMs
+make deploy-local
 ```
 
-Expected result of step 3: `node1 | SUCCESS ... "pong"` and the same for `node2`.
+Expected result of step 4: `node1 | SUCCESS ... "pong"` and the same for `node2`.
+After step 5, `http://<node-ip>/` shows WordPress (`multipass list` gives the IPs).
 
-| Your computer | Step 2 |
+| Your computer | Step 3 |
 |---------------|--------|
 | Mac | `make setup-dev` installs multipass with brew and creates the VMs |
 | Your own Linux | `make setup-dev` sets up the tools, prints `sudo snap install multipass`, then stops with a red "Multipass not detected". Run the snap command, then `make setup-dev` again |
@@ -41,7 +48,7 @@ different lint results and "works on my machine" bugs.
 
 | File | What it pins |
 |------|--------------|
-| `pyproject.toml` | Python `3.13.*`, `ansible-core==2.21.5`, `pre-commit==4.7.0` |
+| `pyproject.toml` | Python `3.13.*`, `ansible-core==2.22.0`, `pre-commit==4.7.0` |
 | `uv.lock` | the exact versions of everything, including sub-dependencies |
 | `.python-version` | which Python uv uses (downloads it if missing) |
 
@@ -64,6 +71,9 @@ pre-commit runs checks **on every `git commit`** and blocks the commit if one fa
 - A hook that **fixes** a file aborts the commit: run `git add` and commit again.
 - `make lint` runs every check on every file without committing.
 - Checks run on **commit**, not on push.
+- The gitleaks hook only scans what is **staged**. The full git history is scanned by CI
+  (`.github/workflows/lint.yml`), which runs on every push and pull request: all
+  pre-commit checks, plus gitleaks over every commit. CI holds no keys and never deploys.
 
 ## Make commands
 
@@ -79,13 +89,15 @@ local development with VMs (your own Mac or Linux, not the classroom).
 
 ### Local VMs (multipass, not on classroom computers)
 
-Two Ubuntu 22.04 VMs (`node1`, `node2`) to test the playbook without paying for cloud servers.
+Two Ubuntu 26.04 VMs (`node1`, `node2`) to test the playbook without paying for cloud servers.
 
 | Command | Does |
 |---------|------|
 | `make vms-up` | creates the VMs if missing, starts them if stopped, and writes `inventory/local.ini` with their current IPs |
 | `make vms-down` | stops them (disks are kept, quick to start again) |
 | `make vms-destroy` | deletes them for good |
+| `make deploy-local` | `vms-up`, then runs `site.yml` on both VMs |
+| `make check-local` | same as `deploy-local` with `--check --diff`: shows what would change, changes nothing |
 
 `make vms-up` is safe to run any time. VM IPs change every time VMs are recreated,
 which is why the inventory file is generated and not committed.
@@ -102,6 +114,41 @@ which is why the inventory file is generated and not committed.
 > After `fclean` there is **no git hook**: run `make setup` before your next commit,
 > or nothing gets checked (gitleaks included).
 
+### Secrets
+
+| Command | Does |
+|---------|------|
+| `make vault-view` | prints the decrypted secrets |
+| `make vault-edit` | opens the secrets in your editor and re-encrypts them on save |
+
+## Secrets (Ansible Vault)
+
+Passwords live in `group_vars/all/vault.yml`, **encrypted** and committed. Ansible
+decrypts it in memory with the key in `.vault_pass` (gitignored, mode 600, shared between
+us outside git). The file on disk always starts with `$ANSIBLE_VAULT;1.1;AES256`.
+
+| Variable | Used for |
+|----------|----------|
+| `vault_db_root_password`, `vault_db_password` | MariaDB root and `wpuser` |
+| `vault_wp_admin_password` | WordPress admin (`cloud1admin`) at `/wp-admin` |
+| `vault_pma_htpasswd` | nginx basic auth in front of phpMyAdmin, as a full htpasswd line: `nginxuser:$apr1$...` |
+| `vault_pma_password` | the plain password for that popup (reference only, no task uses it) |
+| `vault_duckdns_token` | DuckDNS API token (placeholder until Phase 5) |
+
+- New passwords: `openssl rand -hex 20` (hex only, so nothing breaks the quoting in `.env`).
+- New htpasswd line: `openssl passwd -apr1 '<password>'`, then store `user:<hash>`.
+- The key is passed by the Makefile (`--vault-password-file .vault_pass`), **not** by
+  `ansible.cfg`, so `make lint` and CI work on machines without the key. Manual commands
+  need the flag too, for example:
+
+```sh
+uv run ansible-inventory -i inventory/local.ini --playbook-dir . \
+  --vault-password-file .vault_pass --host node1
+```
+
+- Any task that uses a `vault_*` variable needs `no_log: true`, so a failure or `-v` run
+  does not print the secret.
+
 ## How the Ansible side fits together
 
 | File | Role |
@@ -109,18 +156,26 @@ which is why the inventory file is generated and not committed.
 | `cloud-init.yml` | runs on a VM's first boot: adds our public SSH keys |
 | `inventory/local.ini` | the local VMs and their IPs (generated, gitignored) |
 | `inventory/aws.ini` | the AWS servers (later, committed) |
+| `inventory/host_vars/<host>.yml` | values for one server only (e.g. its DuckDNS domain, Phase 5) |
+| `group_vars/all/vars.yml` | plain values shared by every server |
+| `group_vars/all/vault.yml` | encrypted secrets (see "Secrets") |
 | `ansible.cfg` | shared settings: user `ubuntu`, key `~/.ssh/cloud1`, Python on the servers |
-| `site.yml` | the main playbook: what gets installed and configured |
-| `roles/` | the playbook split by topic (`common`, `docker`, `firewall`, `app`, ...) |
+| `site.yml` | the main playbook: `common` → `docker` → `firewall` → `app` |
+| `roles/` | the playbook split by topic |
 
 `ansible.cfg` has **no default inventory** on purpose: you always choose with `-i`, so a
 test can never hit the real servers by accident.
 
 ```sh
-uv run ansible-playbook -i inventory/local.ini site.yml    # local VMs
+uv run ansible-playbook -i inventory/local.ini --vault-password-file .vault_pass site.yml
 ```
 
-Later: `make deploy-local` (VMs) and `make deploy` (AWS) will wrap this.
+`make deploy-local` wraps this for the VMs; `make deploy` will do the same for AWS.
+
+**Where a value wins** (weakest → strongest): role `defaults/` → `group_vars/all/` →
+`host_vars/<host>.yml`. So `vars.yml` gives every host `domain: "{{ ansible_host }}"` and
+`tls_mode: selfsigned`, and a host only gets a `host_vars` file when it needs something
+different. `host_vars` files are matched by the **inventory name** (`node1.yml`), not the IP.
 
 ## Who does what
 
@@ -130,7 +185,8 @@ Later: `make deploy-local` (VMs) and `make deploy` (AWS) will wrap this.
 | roles `common`, `docker`, `firewall` | role `app` (deploys the compose stack) |
 
 The `app` role needs Docker on the servers, so it runs **after** the `docker` role in
-`site.yml`. Until that role exists, test the compose stack locally with Docker Desktop.
+`site.yml`. It reads `app_dir`, `domain`, `pma_path` and the `vault_*` secrets from
+`group_vars`; `app_wp_admin_email` overrides its `admin@example.com` placeholder default.
 
 ## Gotchas we already hit
 
@@ -142,3 +198,7 @@ The `app` role needs Docker on the servers, so it runs **after** the `docker` ro
 | A setting in `ansible.cfg` has a weird value | `#` after a value becomes part of the value | put comments on their own line |
 | Pasted shell commands with `# comments` fail in zsh | zsh ignores `#` comments when typed | remove the comment, or `setopt interactive_comments` |
 | `UNREACHABLE` on ping | VMs are stopped | `make vms-up` |
+| `ansible-inventory` doesn't show `group_vars` values | `group_vars/` sits next to the playbook, and this tool has none | add `--playbook-dir .` |
+| `The vault password file ... was not found` | `.vault_pass` missing on this machine | create it (Quick start, step 2) |
+| phpMyAdmin popup rejects every login | `vault_pma_htpasswd` is not a `user:$apr1$hash` line | regenerate it (see "Secrets"), `make deploy-local` |
+| `ansible-inventory` shows `"{{ ansible_host }}"` literally | it prints raw values; `{{ }}` is only filled in when a playbook runs | nothing to fix |

@@ -35,6 +35,12 @@ vault-view:
 vault-edit:
 	@uv run ansible-vault edit $(VAULT_FILE) $(VAULT_PASS)
 
+deploy:
+	@uv run ansible-playbook -i inventory/aws.ini site.yml $(VAULT_PASS)
+
+check:
+	@uv run ansible-playbook -i inventory/aws.ini site.yml --check --diff $(VAULT_PASS)
+
 deploy-local: vms-up
 	@uv run ansible-playbook -i inventory/local.ini site.yml $(VAULT_PASS)
 
@@ -73,6 +79,10 @@ help:
 	@echo "$(BLUE)║$(RESET)   >  $(MAGENTA)make deploy-local$(RESET) Runs the playbook on the VMs                          $(BLUE)║$(RESET)"
 	@echo "$(BLUE)║$(RESET)   >  $(MAGENTA)make check-local $(RESET) Previews the playbook on the VMs, changes nothing     $(BLUE)║$(RESET)"
 	@echo "$(BLUE)║                                                                              ║$(RESET)"
+	@echo "$(BLUE)║  CLOUD (AWS, inventory/aws.ini):                                             ║$(RESET)"
+	@echo "$(BLUE)║$(RESET)   >  $(BLUE)make deploy      $(RESET) Runs the playbook on the AWS servers                  $(BLUE)║$(RESET)"
+	@echo "$(BLUE)║$(RESET)   >  $(BLUE)make check       $(RESET) Previews the playbook on AWS (run after a deploy)     $(BLUE)║$(RESET)"
+	@echo "$(BLUE)║                                                                              ║$(RESET)"
 	@echo "$(BLUE)║  QUALITY:                                                                    ║$(RESET)"
 	@echo "$(BLUE)║$(RESET)   >  $(BLUE)make lint        $(RESET) Runs every pre-commit check on ALL files              $(BLUE)║$(RESET)"
 	@echo "$(BLUE)║                                                                              ║$(RESET)"
@@ -88,4 +98,4 @@ help:
 	@echo "$(BLUE)║                                                                              ║$(RESET)"
 	@echo "$(BLUE)╚══════════════════════════════════════════════════════════════════════════════╝$(RESET)"
 
-.PHONY: all help setup setup-dev lint vault-view vault-edit deploy-local check-local clean fclean vms-up vms-down vms-destroy devclean
+.PHONY: all help setup setup-dev lint vault-view vault-edit deploy deploy-local check check-local clean fclean vms-up vms-down vms-destroy devclean
