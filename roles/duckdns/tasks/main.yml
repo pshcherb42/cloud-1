@@ -1,0 +1,10 @@
+---
+- name: Update DuckDNS record for this host
+  ansible.builtin.uri:
+    url: "https://www.duckdns.org/update?domains={{ duckdns_subdomain }}&token={{ vault_duckdns_token }}&ip="
+    return_content: true
+  register: duckdns_result
+  no_log: true
+  changed_when: false
+  failed_when: duckdns_result.content | trim != "OK"
+  when: duckdns_subdomain is defined
