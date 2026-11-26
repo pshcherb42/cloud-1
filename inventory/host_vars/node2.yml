@@ -1,0 +1,3 @@
+---
+duckdns_subdomain: pshcherb-node2
+domain: "{{ duckdns_subdomain }}.duckdns.org"
